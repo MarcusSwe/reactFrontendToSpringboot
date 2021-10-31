@@ -7,6 +7,7 @@ function App() {
   const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
   const [loggedIn, setLoggedIn] = useState("not logged in");
+  const [token, setToken] = useState("");
 
  function addUser() {
    async function fetchAdd(){
@@ -36,8 +37,38 @@ function App() {
 
 function loginUser() {
   async function fetchLogin(){
-    const resp = await fetch('')
+    const resp = await fetch('http://localhost:8080/user/login', {
+      method: 'POST',
+      headers: ({
+       'username': user,
+       'password': password
+    })
+    })
+    const tokenstring = await resp.text();
+    if(resp.status===406){
+      alert("something went wrong");
+    } else {
+    
+    setToken(tokenstring);
+    setLoggedIn("logged in as: " + user);
+    }
   }
+  fetchLogin();
+}
+
+function logoffUser(){ 
+  async function fetchLogOff(){    
+    if(token.length>1){
+    const resp = await fetch('http://localhost:8080/user/logout', {
+      method: 'POST',
+      headers: { 'token': token}
+     }) 
+     setToken("");
+     setLoggedIn("not logged in");
+    }
+    else alert("not logged in!")
+  }
+  fetchLogOff();
 }
 
 
@@ -46,8 +77,8 @@ function loginUser() {
       <div>
     Name: <input type="text" name="username" onChange={e => {setUser(e.target.value)}}/>
     Password: <input type="text" name="username" onChange={e => {setPassword(e.target.value)}}/>
-    <button onClick={e =>alert(user)}>Login</button><button onClick={e =>{addUser()}}>Register </button>
-    <button>show own favorites</button><button>log off</button>{loggedIn}
+    <button onClick={e =>{loginUser()}}>Login</button><button onClick={e =>{addUser()}}>Register </button>
+    <button>show own favorites</button><button onClick={e =>{logoffUser()}}>log off</button>{loggedIn}
       </div>      
     </div>
   );
