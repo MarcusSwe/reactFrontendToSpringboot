@@ -12,6 +12,12 @@ function App() {
   const [productDesc, setProductDesc] = useState("");
   const [price, setPrice] = useState(0);
   const [products, setProducts] = useState([]);
+  const [fav, setFav] = useState([]);
+  const [omegaHook, callOmegaHook] = useState()
+
+const showFav = () => {
+  callOmegaHook(!omegaHook);
+}
 
  function addUser() {
    async function fetchAdd(){
@@ -68,6 +74,7 @@ function logoffUser(){
      }) 
      setToken("");
      setLoggedIn("not logged in");
+     showFav();
     }
     else alert("not logged in!")
   }
@@ -100,8 +107,7 @@ function createProduct() {
     }
     getProducts();
   }
-  fetchCreate();
- 
+  fetchCreate(); 
 }
 
 function getProducts() {
@@ -119,13 +125,33 @@ useEffect(() => {
    } else setProducts([]);    
 }, [token]);
 
+
+function getFavorites() {
+  fetch('http://localhost:8080/product/favorites', {
+    method: 'GET',
+    headers: { 'token': token }
+   })
+    .then(resp => resp.json())
+    .then(data =>{setFav(data);console.log(data)});
+}
+
+useEffect(() => {
+  if(token.length>1 && fav.length<1){
+   getFavorites();
+  } else setFav([]);    
+}, [omegaHook]);
+
+
+
+
+
   return (
     <div>
       <div>
     Name: <input type="text" name="username" onChange={e => {setUser(e.target.value)}}/>
     Password: <input type="text" name="username" onChange={e => {setPassword(e.target.value)}}/>
     <button onClick={e =>{loginUser()}}>Login</button><button onClick={e =>{addUser()}}>Register </button>
-    <button>show own favorites</button><button onClick={e =>{logoffUser()}}>log off</button>{loggedIn}
+    <button onClick={e => {showFav()}}>show own favorites</button><button onClick={e =>{logoffUser()}}>log off</button>{loggedIn}
       </div>     
       <div>
         Product: <input type="text" name="product" onChange={e => {setProduct(e.target.value)}}/>
@@ -133,6 +159,18 @@ useEffect(() => {
         Product Price: <input type="number" name="price" onChange={e => {setPrice(e.target.value)}}/>
         <button onClick={e =>{createProduct()}}>Create</button>
       </div> 
+
+      <div>
+           <ul>
+                {fav.map((product, index) => {
+                    return (<li key={index}>
+                        {product.name} | {product.price} | {product.description}                       
+                    </li>);
+                })}
+            </ul>
+      </div>
+
+
       <div>
            <ul>
                 {products.map((product, index) => {
@@ -142,11 +180,9 @@ useEffect(() => {
                             fetch('http://localhost:8080/product/add-favorite', {
                                 method: 'PUT',
                                 headers: { 'token': token,
-                              
+                                'Content-Type': 'text/plain'
                                },
-                                body: ({
-                                  productName: product                                  
-                                })                                
+                                body: product.name
                             }).then(resp => {                              
                               switch(resp.status) {
                                 case 404:         
@@ -156,7 +192,8 @@ useEffect(() => {
                                   alert(resp.texg())
                                   break;
                                default:
-                                 alert("product created")         
+                                 alert("product created")      
+                                getFavorites()                                 
                               }                                
                             });
                         }}>Add favorite</button>
