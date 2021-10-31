@@ -18,12 +18,14 @@ function App() {
          password: password
        }) 
      })
+     const stringrespons = await resp.text();
+
      switch(resp.status) {
-       case 409:
-         alert("user already exist")
+       case 409:         
+         alert(stringrespons)
          break;
        case 500:
-         alert("something went wrong")
+         alert(stringrespons)
          break;
       default:
         alert("user created")         
@@ -31,6 +33,13 @@ function App() {
    }
    fetchAdd();
  }
+
+function loginUser() {
+  async function fetchLogin(){
+    const resp = await fetch('')
+  }
+}
+
 
   return (
     <div>
