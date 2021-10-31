@@ -56,6 +56,7 @@ function loginUser() {
     }
   }
   fetchLogin();
+  
 }
 
 function logoffUser(){ 
@@ -97,9 +98,10 @@ function createProduct() {
      default:
        alert("product created")         
     }
+    getProducts();
   }
   fetchCreate();
-  getProducts();
+ 
 }
 
 function getProducts() {
@@ -108,7 +110,7 @@ function getProducts() {
     headers: { 'token': token }
    })
     .then(resp => resp.json())
-    .then(data => setProducts(data));
+    .then(data =>{setProducts(data);console.log(data)});
 }
 
 useEffect(() => {
@@ -140,13 +142,12 @@ useEffect(() => {
                             fetch('http://localhost:8080/product/add-favorite', {
                                 method: 'PUT',
                                 headers: { 'token': token,
-                                'Content-Type': 'application/json'
+                              
                                },
-                                body: JSON.stringify({
+                                body: ({
                                   productName: product                                  
                                 })                                
-                            }).then(resp => {
-                              
+                            }).then(resp => {                              
                               switch(resp.status) {
                                 case 404:         
                                   alert(resp.text())
@@ -171,4 +172,3 @@ useEffect(() => {
 export default App;
 
 
-// <button onClick={e =>alert(user)}>
